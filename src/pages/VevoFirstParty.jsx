@@ -20,7 +20,7 @@ function VevoFirstParty() {
         day: '2-digit',
         month: 'long',
         year: 'numeric',
-        timeZone: 'Australia/Sydney'
+        timeZone: 'UTC'
       });
     } catch {
       return dateString;
