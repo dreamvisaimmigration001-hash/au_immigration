@@ -97,32 +97,7 @@ function VevoFirstParty() {
 
                     <div id="_2a0a2a0a2" className="wc-panel">
                       <div className="wc-flowlayout wc-align-vertical">
-                        <div className="wc-cell">
-                          <div id="_2a0a2a0a2a" className="wc-panel">
-                            <div className="wc-content">
-                              <div role="presentation" id="_2a0a2a0a2a0" className="wc-fieldlayout wc_fld_lblwth_35 wc-layout-flat">
-                                <div id="_2a0a2a0a2a0a" className="wc-field">
-                                  <label htmlFor="_2a0a2a0a2a0a1a_input" id="_2a0a2a0a2a0a0" className="wc-label wc_req">Document type*</label>
-                                  <div className="wc-input">
-                                    <div id="_2a0a2a0a2a0a1" className="wc-panel">
-                                      <div className="wc-flowlayout wc-hgap-med wc-align-left">
-                                        <div className="wc-cell">
-                                          <span id="_2a0a2a0a2a0a1a" className="wc-dropdown wc-input-wrapper">
-                                            <select id="_2a0a2a0a2a0a1a_input" name="_2a0a2a0a2a0a1a" required defaultValue="04">
-                                              <option className="wc-option" value="04">DFTTA</option>
-                                            </select>
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
 
-                        <div className="wc-cell">&nbsp;</div>
 
                         <div className="wc-cell">
                           <div id="_2a0a2a0a2c" className="wc-panel">
@@ -182,28 +157,15 @@ function VevoFirstParty() {
                                     <div id="_2a0a2a0a2e0a1" className="wc-panel">
                                       <div className="wc-flowlayout wc-hgap-med wc-align-left">
                                         <div className="wc-cell">
-                                          <div id="_2a0a2a0a2e0a1a" className="wc-datefield wc-input-wrapper wc_datefield_partial" role="combobox">
-                                            <input id="_2a0a2a0a2e0a1a_input" type="text" name="_2a0a2a0a2e0a1a" required autoComplete="off" />
+                                            <div id="_2a0a2a0a2e0a1a" className="wc-datefield wc-input-wrapper wc_datefield_partial" role="combobox">
+                                              <input id="_2a0a2a0a2e0a1a_input" type="date" name="_2a0a2a0a2e0a1a" required autoComplete="off" />
                                           </div>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                                <div id="_2a0a2a0a2e0b" className="wc-field">
-                                  <label htmlFor="_2a0a2a0a2e0b1a_input" id="_2a0a2a0a2e0b0" className="wc-label wc_req">Document number*</label>
-                                  <div className="wc-input">
-                                    <div id="_2a0a2a0a2e0b1" className="wc-panel">
-                                      <div className="wc-flowlayout wc-hgap-med wc-align-left">
-                                        <div className="wc-cell">
-                                          <span id="_2a0a2a0a2e0b1a" className="wc-textfield wc-input-wrapper">
-                                            <input id="_2a0a2a0a2e0b1a_input" type="text" name="_2a0a2a0a2e0b1a" required size="50" maxLength="14" />
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
+
                                 <div id="_2a0a2a0a2e0c" className="wc-field">
                                   <label htmlFor="_2a0a2a0a2e0c1a_input" id="_2a0a2a0a2e0c0" className="wc-label wc_req">Country of document*</label>
                                   <div className="wc-input">
