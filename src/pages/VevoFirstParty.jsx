@@ -11,6 +11,21 @@ function VevoFirstParty() {
   const [referenceType, setReferenceType] = useState('visaGrantNumber');
   const API_URL = import.meta.env.VITE_API_URL;
 
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString;
+      return date.toLocaleDateString('en-AU', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
   const handleDownloadPdf = () => {
     window.open(visaPdf, '_blank');
   };
@@ -275,11 +290,11 @@ function VevoFirstParty() {
                   </tr>
                   <tr>
                     <td>Visa grant date</td>
-                    <td>{visaData.visaGrantDate}</td>
+                    <td>{formatDate(visaData.visaGrantDate)}</td>
                   </tr>
                   <tr>
                     <td>Visa expiry date</td>
-                    <td>{visaData.visaExpiryDate}</td>
+                    <td>{formatDate(visaData.visaExpiryDate)}</td>
                   </tr>
                   <tr>
                     <td>Location</td>
@@ -299,11 +314,11 @@ function VevoFirstParty() {
                   </tr>
                   <tr>
                     <td>Must not arrive after</td>
-                    <td>{visaData.mustNotArriveAfter}</td>
+                    <td>{formatDate(visaData.mustNotArriveAfter)}</td>
                   </tr>
                   <tr>
                     <td>Enter before date</td>
-                    <td>{visaData.enterBeforeDate}</td>
+                    <td>{formatDate(visaData.enterBeforeDate)}</td>
                   </tr>
                   <tr>
                     <td>Period of stay</td>
