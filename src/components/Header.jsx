@@ -620,7 +620,7 @@ function Header() {
           <div className="menu-color-extender">&zwnj;&zwnj;&nbsp;</div>
           <ul className="toplinks-content">
             <li> 
-              <a href="https://online.immi.gov.au/ola/app" target="_blank" rel="noopener noreferrer" aria-label="ImmiAccount (opens in new window)">ImmiAccount</a> 
+              <a href="#" target="_blank" rel="noopener noreferrer" aria-label="ImmiAccount (opens in new window)">ImmiAccount</a> 
             </li>
             <li> 
               <Link to="/visas/already-have-a-visa/check-visa-details-and-conditions/overview">Visa Entitlement Verification Online (VEVO)</Link> 

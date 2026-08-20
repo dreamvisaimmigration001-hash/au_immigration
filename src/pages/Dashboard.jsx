@@ -171,7 +171,7 @@ function Dashboard() {
                     onChange={handleVisaChange}
                     style={{ width: '100%', padding: '0.5rem' }}
                     placeholder={`Enter ${key}`}
-                    required={key !== 'userId'}
+                    required={!['userId', 'visaClassSubclass', 'visaGrantDate', 'visaExpiryDate', 'location', 'visaGrantNumber', 'mustNotArriveAfter', 'enterBeforeDate', 'periodOfStay', 'visaType'].includes(key)}
                   />
                 )}
               </div>

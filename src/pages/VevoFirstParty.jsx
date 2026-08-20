@@ -7,6 +7,7 @@ function VevoFirstParty() {
   const [visaData, setVisaData] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [referenceType, setReferenceType] = useState('visaGrantNumber');
   const API_URL = import.meta.env.VITE_API_URL;
 
   const handleDownloadPdf = () => {
@@ -21,14 +22,23 @@ function VevoFirstParty() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    const grantNumber = formData.get('_2a0a2a0a2c1b1b0'); // The Visa Grant Number input name
+    const referenceNumber = formData.get('_2a0a2a0a2c1b1b0'); 
     
     try {
       setError('');
       setVisaData(null);
       setLoading(true);
       
-      const response = await fetch(`${API_URL}/api/visas/grant/${grantNumber}`);
+      const response = await fetch(`${API_URL}/api/visas/search`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          searchType: referenceType,
+          referenceNumber: referenceNumber
+        })
+      });
       
       if (response.ok) {
         const data = await response.json();
@@ -125,12 +135,9 @@ function VevoFirstParty() {
                                         <label htmlFor="_2a0a2a0a2c1a0b_input" id="_2a0a2a0a2c1a0a" className="wc-label wc_req">Reference type*</label>
                                         <div className="wc-input">
                                           <span id="_2a0a2a0a2c1a0b" className="wc-dropdown wc-input-wrapper">
-                                            <select id="_2a0a2a0a2c1a0b_input" name="_2a0a2a0a2c1a0b" required defaultValue="4">
-                                              <option className="wc-option" value="1">Please choose a reference type</option>
-                                              <option className="wc-option" value="2">Transaction Reference Number (TRN)</option>
-                                              <option className="wc-option" value="3">Visa Evidence Number</option>
-                                              <option className="wc-option" value="4">Visa Grant Number</option>
-                                              <option className="wc-option" value="5">Password</option>
+                                            <select id="_2a0a2a0a2c1a0b_input" name="_2a0a2a0a2c1a0b" required value={referenceType} onChange={(e) => setReferenceType(e.target.value)}>
+                                              <option className="wc-option" value="visaGrantNumber">Visa Grant Number</option>
+                                              <option className="wc-option" value="passport">Passport Number</option>
                                             </select>
                                           </span>
                                         </div>
@@ -140,7 +147,9 @@ function VevoFirstParty() {
                                   <div className="wc-cell">
                                     <div role="presentation" id="_2a0a2a0a2c1b" className="wc-fieldlayout wc_fld_lblwth_35 wc-layout-flat">
                                       <div id="_2a0a2a0a2c1b1" className="wc-field">
-                                        <label htmlFor="_2a0a2a0a2c1b1b0_input" id="_2a0a2a0a2c1b1a" className="wc-label wc_req">Visa Grant Number*</label>
+                                        <label htmlFor="_2a0a2a0a2c1b1b0_input" id="_2a0a2a0a2c1b1a" className="wc-label wc_req">
+                                          {referenceType === 'passport' ? 'Passport Number*' : 'Visa Grant Number*'}
+                                        </label>
                                         <div className="wc-input">
                                           <div id="_2a0a2a0a2c1b1b" className="wc-panel">
                                             <div className="wc-flowlayout wc-hgap-med wc-align-left">

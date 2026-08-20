@@ -126,8 +126,8 @@ function VisaConditionsOverview() {
                   <div className="col-sm-4">
                     <h2>VEVO<br/></h2>
                     <p><Link className="btn btn-block btn-cta external" to="/evo/firstParty" target="_blank" rel="noopener noreferrer">Check your own visa details</Link></p>
-                    <p><a className="btn btn-block btn-cta external" href="https://online.immi.gov.au/evo/thirdParty" target="_blank" rel="noopener noreferrer">Organisation account holder VEVO login</a></p>
-                    <p><a className="btn btn-block btn-cta external" href="https://online.immi.gov.au/lusc/register" target="_blank" rel="noopener noreferrer">Register as a VEVO organisation</a></p>
+                    <p><a className="btn btn-block btn-cta external" href="#" target="_blank" rel="noopener noreferrer">Organisation account holder VEVO login</a></p>
+                    <p><a className="btn btn-block btn-cta external" href="#" target="_blank" rel="noopener noreferrer">Register as a VEVO organisation</a></p>
                   </div>
                 </div> 
                 <br/> 
