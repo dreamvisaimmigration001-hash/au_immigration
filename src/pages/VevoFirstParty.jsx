@@ -297,10 +297,10 @@ function VevoFirstParty() {
                     <td>Visa expiry date</td>
                     <td>{formatDate(visaData.visaExpiryDate)}</td>
                   </tr>
-                  <tr>
+                  {/* <tr>
                     <td>Location</td>
                     <td>{visaData.location}</td>
-                  </tr>
+                  </tr> */}
                   <tr>
                     <td>Visa status</td>
                     <td>{visaData.visaStatus}</td>
