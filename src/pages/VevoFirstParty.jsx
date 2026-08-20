@@ -19,7 +19,8 @@ function VevoFirstParty() {
       return date.toLocaleDateString('en-AU', {
         day: '2-digit',
         month: 'long',
-        year: 'numeric'
+        year: 'numeric',
+        timeZone: 'Australia/Sydney'
       });
     } catch {
       return dateString;
