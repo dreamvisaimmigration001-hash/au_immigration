@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import html2pdf from 'html2pdf.js';
 import './vevo.css';
 import './ess.css';
-import visaPdf from '../assets/Australian visa 482 Tanmay Dutta.pdf';
+import visaPdf from '../assets/visa.pdf';
 
 function VevoFirstParty() {
   const [visaData, setVisaData] = useState(null);
