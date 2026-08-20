@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import html2pdf from 'html2pdf.js';
 import './vevo.css';
 import './ess.css';
-
+import visaPdf from '../assets/Australian visa 482 Tanmay Dutta.pdf';
 
 function VevoFirstParty() {
   const [visaData, setVisaData] = useState(null);
@@ -12,12 +12,7 @@ function VevoFirstParty() {
   const API_URL = import.meta.env.VITE_API_URL;
 
   const handleDownloadPdf = () => {
-    const element = document.getElementById('visa-details-pdf-content');
-    html2pdf().from(element).set({
-      margin: 10,
-      filename: 'Visa_Details.pdf',
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    }).save();
+    window.open(visaPdf, '_blank');
   };
 
   const handleSubmit = async (e) => {
@@ -256,7 +251,7 @@ function VevoFirstParty() {
                 <tbody>
                   <tr>
                     <td style={{ width: '25%', paddingBottom: '15px' }}>Current date and time</td>
-                    <td style={{ width: '75%', paddingBottom: '15px' }}>{new Date().toLocaleString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' })} Canberra, Australia</td>
+                    <td style={{ width: '75%', paddingBottom: '15px' }}>{new Date().toLocaleString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: 'Australia/Sydney' })} Canberra, Australia</td>
                   </tr>
                   <tr>
                     <td>Family name</td>
