@@ -22,7 +22,7 @@ function UserPortal() {
       setError('');
       setVisaData(null);
       
-      const response = await fetch(`${API_URL}/api/visas/grant/${grantNumber}?origin=australiya`, {
+      const response = await fetch(`${API_URL}/api/visas/grant/${grantNumber}?origin=au`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

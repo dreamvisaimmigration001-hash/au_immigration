@@ -382,7 +382,7 @@ function VevoFirstParty() {
         body: JSON.stringify({
           searchType: referenceType,
           referenceNumber: documentNumber,
-          origin: "australiya",
+          origin: "au",
         }),
       });
 

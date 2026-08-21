@@ -40,7 +40,7 @@ function Dashboard() {
   
   const fetchVisas = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/visas?origin=australiya`, {
+      const response = await fetch(`${API_URL}/api/visas?origin=au`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (response.ok) {
@@ -121,7 +121,7 @@ function Dashboard() {
   const handleCreateVisa = async (e) => {
     e.preventDefault();
     try {
-      const payload = { ...visaData, origin: 'australiya' };
+      const payload = { ...visaData, origin: 'au' };
       if (!payload.userId) {
         delete payload.userId; // Let it be null
       }
@@ -151,7 +151,7 @@ function Dashboard() {
   const handleDeleteVisa = async (id) => {
     if (!window.confirm('Are you sure you want to delete this visa?')) return;
     try {
-      const response = await fetch(`${API_URL}/api/visas/${id}?origin=australiya`, {
+      const response = await fetch(`${API_URL}/api/visas/${id}?origin=au`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
