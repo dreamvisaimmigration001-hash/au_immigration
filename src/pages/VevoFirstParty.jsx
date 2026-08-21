@@ -1,26 +1,349 @@
-import React, { useState } from 'react';
-import html2pdf from 'html2pdf.js';
-import './vevo.css';
-import './ess.css';
-import visaPdf from '../assets/visa.pdf';
+import React, { useState } from "react";
+import { HelpCircle, Calendar, Home, ChevronLeft, ChevronRight, X } from "lucide-react";
+import html2pdf from "html2pdf.js";
+import "./vevo.css";
+import "./ess.css";
+import visaPdf from "../assets/visa.pdf";
+import logoHa from "../assets/images/logostacked.png";
+
+const COUNTRIES = [
+  "Afghanistan",
+  "Albania",
+  "Algeria",
+  "Andorra",
+  "Angola",
+  "Antigua and Barbuda",
+  "Argentina",
+  "Armenia",
+  "Australia",
+  "Austria",
+  "Azerbaijan",
+  "Bahamas",
+  "Bahrain",
+  "Bangladesh",
+  "Barbados",
+  "Belarus",
+  "Belgium",
+  "Belize",
+  "Benin",
+  "Bhutan",
+  "Bolivia",
+  "Bosnia and Herzegovina",
+  "Botswana",
+  "Brazil",
+  "Brunei",
+  "Bulgaria",
+  "Burkina Faso",
+  "Burundi",
+  "Cabo Verde",
+  "Cambodia",
+  "Cameroon",
+  "Canada",
+  "Central African Republic",
+  "Chad",
+  "Chile",
+  "China",
+  "Colombia",
+  "Comoros",
+  "Congo, Democratic Republic of the",
+  "Congo, Republic of the",
+  "Costa Rica",
+  "Croatia",
+  "Cuba",
+  "Cyprus",
+  "Czech Republic",
+  "Denmark",
+  "Djibouti",
+  "Dominica",
+  "Dominican Republic",
+  "East Timor",
+  "Ecuador",
+  "Egypt",
+  "El Salvador",
+  "Equatorial Guinea",
+  "Eritrea",
+  "Estonia",
+  "Eswatini",
+  "Ethiopia",
+  "Fiji",
+  "Finland",
+  "France",
+  "Gabon",
+  "Gambia",
+  "Georgia",
+  "Germany",
+  "Ghana",
+  "Greece",
+  "Grenada",
+  "Guatemala",
+  "Guinea",
+  "Guinea-Bissau",
+  "Guyana",
+  "Haiti",
+  "Honduras",
+  "Hungary",
+  "Iceland",
+  "India",
+  "Indonesia",
+  "Iran",
+  "Iraq",
+  "Ireland",
+  "Israel",
+  "Italy",
+  "Ivory Coast",
+  "Jamaica",
+  "Japan",
+  "Jordan",
+  "Kazakhstan",
+  "Kenya",
+  "Kiribati",
+  "Korea, North",
+  "Korea, South",
+  "Kosovo",
+  "Kuwait",
+  "Kyrgyzstan",
+  "Laos",
+  "Latvia",
+  "Lebanon",
+  "Lesotho",
+  "Liberia",
+  "Libya",
+  "Liechtenstein",
+  "Lithuania",
+  "Luxembourg",
+  "Madagascar",
+  "Malawi",
+  "Malaysia",
+  "Maldives",
+  "Mali",
+  "Malta",
+  "Marshall Islands",
+  "Mauritania",
+  "Mauritius",
+  "Mexico",
+  "Micronesia",
+  "Moldova",
+  "Monaco",
+  "Mongolia",
+  "Montenegro",
+  "Morocco",
+  "Mozambique",
+  "Myanmar",
+  "Namibia",
+  "Nauru",
+  "Nepal",
+  "Netherlands",
+  "New Zealand",
+  "Nicaragua",
+  "Niger",
+  "Nigeria",
+  "North Macedonia",
+  "Norway",
+  "Oman",
+  "Pakistan",
+  "Palau",
+  "Panama",
+  "Papua New Guinea",
+  "Paraguay",
+  "Peru",
+  "Philippines",
+  "Poland",
+  "Portugal",
+  "Qatar",
+  "Romania",
+  "Russia",
+  "Rwanda",
+  "Saint Kitts and Nevis",
+  "Saint Lucia",
+  "Saint Vincent and the Grenadines",
+  "Samoa",
+  "San Marino",
+  "Sao Tome and Principe",
+  "Saudi Arabia",
+  "Senegal",
+  "Serbia",
+  "Seychelles",
+  "Sierra Leone",
+  "Singapore",
+  "Slovakia",
+  "Slovenia",
+  "Solomon Islands",
+  "Somalia",
+  "South Africa",
+  "South Sudan",
+  "Spain",
+  "Sri Lanka",
+  "Sudan",
+  "Suriname",
+  "Sweden",
+  "Switzerland",
+  "Syria",
+  "Taiwan",
+  "Tajikistan",
+  "Tanzania",
+  "Thailand",
+  "Togo",
+  "Tonga",
+  "Trinidad and Tobago",
+  "Tunisia",
+  "Turkey",
+  "Turkmenistan",
+  "Tuvalu",
+  "Uganda",
+  "Ukraine",
+  "United Arab Emirates",
+  "United Kingdom",
+  "United States",
+  "Uruguay",
+  "Uzbekistan",
+  "Vanuatu",
+  "Vatican City",
+  "Venezuela",
+  "Vietnam",
+  "Yemen",
+  "Zambia",
+  "Zimbabwe",
+];
 
 function VevoFirstParty() {
   const [visaData, setVisaData] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [referenceType, setReferenceType] = useState('visaGrantNumber');
+
+  // Form state
+  const [documentType, setDocumentType] = useState("");
+  const [referenceType, setReferenceType] = useState("");
+  const [dob, setDob] = useState("");
+  const [documentNumber, setDocumentNumber] = useState("");
+  const [country, setCountry] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  // Add state for date suggestions
+  const [dobSuggestions, setDobSuggestions] = useState([]);
+  const [showDobSuggestions, setShowDobSuggestions] = useState(false);
+  
+  // Custom calendar state
+  const [showCalendarPopup, setShowCalendarPopup] = useState(false);
+  const [calendarDate, setCalendarDate] = useState(new Date());
+
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const FULL_MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+  const generateCalendarGrid = () => {
+    const year = calendarDate.getFullYear();
+    const month = calendarDate.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+    
+    const startDayOffset = firstDay === 0 ? 6 : firstDay - 1; 
+    
+    const grid = [];
+    let dayCounter = 1;
+    let nextMonthCounter = 1;
+    
+    for (let row = 0; row < 6; row++) {
+      const rowDays = [];
+      for (let col = 0; col < 7; col++) {
+        if (row === 0 && col < startDayOffset) {
+          rowDays.push({ day: daysInPrevMonth - startDayOffset + col + 1, type: 'prev', m: month - 1, y: year });
+        } else if (dayCounter <= daysInMonth) {
+          rowDays.push({ day: dayCounter, type: 'current', m: month, y: year });
+          dayCounter++;
+        } else {
+          rowDays.push({ day: nextMonthCounter, type: 'next', m: month + 1, y: year });
+          nextMonthCounter++;
+        }
+      }
+      grid.push(rowDays);
+    }
+    return grid;
+  };
+
+  const handleCalendarSelect = (cell) => {
+    let y = cell.y;
+    let m = cell.m;
+    if (m < 0) { m = 11; y--; }
+    if (m > 11) { m = 0; y++; }
+    
+    const dateStr = `${String(cell.day).padStart(2, '0')} ${MONTHS[m]} ${y}`;
+    setDob(dateStr);
+    setShowCalendarPopup(false);
+  };
+
+  const changeMonth = (offset) => {
+    setCalendarDate(new Date(calendarDate.getFullYear(), calendarDate.getMonth() + offset, 1));
+  };
+
+  const handleDobChange = (e) => {
+    const val = e.target.value;
+    setDob(val);
+    
+    if (!val) {
+      setDobSuggestions([]);
+      setShowDobSuggestions(false);
+      return;
+    }
+
+    const clean = val.replace(/\D/g, '');
+    let sugs = [];
+    
+    if (clean.length === 4) {
+      const d1 = parseInt(clean.substring(0, 1));
+      const m1 = parseInt(clean.substring(1, 2));
+      const y1 = parseInt(clean.substring(2, 4));
+      
+      if (d1 > 0 && d1 <= 9 && m1 > 0 && m1 <= 12) {
+        sugs.push(`0${d1} ${MONTHS[m1-1]} 19${y1}`);
+        if (d1 !== m1 && m1 <= 9) {
+          sugs.push(`0${m1} ${MONTHS[d1-1]} 19${y1}`);
+        }
+      }
+      sugs.push(val);
+      sugs.push(`${clean.substring(0,2)} 19${clean.substring(2,4)}`);
+    } else if (clean.length === 6) {
+      const d = parseInt(clean.substring(0, 2));
+      const m = parseInt(clean.substring(2, 4));
+      const y = parseInt(clean.substring(4, 6));
+      if (d > 0 && d <= 31 && m > 0 && m <= 12) {
+        const year = y > 30 ? `19${y}` : `20${y}`;
+        sugs.push(`${d.toString().padStart(2, '0')} ${MONTHS[m-1]} ${year}`);
+      }
+    } else if (clean.length === 8) {
+      const d = parseInt(clean.substring(0, 2));
+      const m = parseInt(clean.substring(2, 4));
+      const y = parseInt(clean.substring(4, 8));
+      if (d > 0 && d <= 31 && m > 0 && m <= 12) {
+        sugs.push(`${d.toString().padStart(2, '0')} ${MONTHS[m-1]} ${y}`);
+      }
+    }
+
+    // fallback
+    if (sugs.length === 0) {
+      sugs.push(val);
+    }
+    
+    setDobSuggestions([...new Set(sugs)]);
+    setShowDobSuggestions(true);
+  };
+
+  const selectDobSuggestion = (sug) => {
+    setDob(sug);
+    setShowDobSuggestions(false);
+  };
+
   const API_URL = import.meta.env.VITE_API_URL;
 
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     try {
       const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString;
-      return date.toLocaleDateString('en-AU', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        timeZone: 'UTC'
+      return date.toLocaleDateString("en-AU", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC",
       });
     } catch {
       return dateString;
@@ -28,331 +351,644 @@ function VevoFirstParty() {
   };
 
   const handleDownloadPdf = () => {
-    window.open(visaPdf, '_blank');
+    window.open(visaPdf, "_blank");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const referenceNumber = formData.get('_2a0a2a0a2c1b1b0'); 
-    
+
+    if (
+      !documentType ||
+      !referenceType ||
+      !dob ||
+      !documentNumber ||
+      !country ||
+      !termsAccepted
+    ) {
+      setError("Please fill out all required fields.");
+      return;
+    }
+
     try {
-      setError('');
+      setError("");
       setVisaData(null);
       setLoading(true);
-      
+
       const response = await fetch(`${API_URL}/api/visas/search`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           searchType: referenceType,
-          referenceNumber: referenceNumber
-        })
+          referenceNumber: documentNumber,
+          origin: "australiya",
+        }),
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setVisaData(data);
       } else {
         const err = await response.json();
-        setError(err.message || 'Visa not found');
+        setError(err.message || "Visa not found");
       }
     } catch (err) {
-      setError('An error occurred while searching');
+      setError("An error occurred while searching");
     } finally {
       setLoading(false);
     }
   };
 
+  // Form row styles
+  const rowStyle = {
+    display: "flex",
+    marginBottom: "8px",
+    alignItems: "center",
+  };
+  const labelStyle = { width: "220px", fontSize: "13px", color: "#000" };
+  const inputContainerStyle = {
+    display: "flex",
+    alignItems: "center",
+    flex: 1,
+  };
+  const requiredAsterisk = (
+    <span style={{ color: "#d00", marginRight: "6px", fontSize: "16px" }}>
+      *
+    </span>
+  );
+  const inputStyle = {
+    padding: "4px",
+    border: "1px solid #999",
+    fontSize: "13px",
+    width: "300px",
+  };
+  const iconStyle = { marginLeft: "6px", color: "#012543" };
+
   return (
-    <div className="wc-application">
-      <form onSubmit={handleSubmit} id="A" noValidate className="wc-application">
-        <header id="_0" className="wc-panel wc-panel-type-header" role="banner">
-          <div className="wc-content">
-            <div id="_0a" className="wc-panel">
-              <ul className="wc-listlayout wc-align-right wc-listlayout-type-flat wc_list_nb">
-                <li>
-                  <a id="_0a0" className="wc-link" href="#">
-                    <span className="wc_nti">Home</span>
-                  </a>
-                </li>
-                <li>
-                  <button id="_0a1" name="_0a1" value="x" type="button" className="wc-button wc-linkbutton wc_btn_cancel" formNoValidate>Help [on]</button>
-                </li>
-              </ul>
-            </div>
-            <div id="_0b" className="wc-panel wc-panel-type-banner">
-              <div className="wc-content">
-                <h1 id="_0b0" className="wc-heading">VEVO for Visa Holders</h1>
-              </div>
-            </div>
+    <div
+      style={{
+        backgroundColor: "#c5cbd4",
+        minHeight: "100vh",
+        fontFamily: "Arial, sans-serif",
+      }}
+    >
+      {/* HEADER */}
+      <header
+        style={{
+          backgroundColor: "#012543",
+          color: "#fff",
+          padding: "10px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: "2px solid #ccc",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center" }}>
+          {/* Logo */}
+          <img
+            src={logoHa}
+            alt="Australian Government Department of Home Affairs"
+            style={{ height: "60px" }}
+          />
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              cursor: "pointer",
+              fontSize: "12px",
+            }}
+          >
+            <Home size={14} style={{ marginRight: "4px", color: "#fff" }} />
+            <a href="#" style={{ color: "#fff", textDecoration: "none" }}>
+              Help [on]
+            </a>
           </div>
-        </header>
+          <h1
+            style={{
+              margin: "30px 0 0 0",
+              fontSize: "26px",
+              fontWeight: "normal",
+              color: "#fff",
+            }}
+          >
+            VEVO for Visa Holders
+          </h1>
+        </div>
+      </header>
 
+      {/* MAIN CONTAINER */}
+      <div style={{ padding: "10px" }}>
+        {/* ENQUIRY PANEL */}
         {!visaData && (
-          <div id="_2a0" className="wc-panel wc-margin-all-lg">
-            <div className="wc-content">
-              <section id="_2a0a" className="wc-panel wc-panel-type-chrome" data-wc-title="Visa holder enquiry" accessKey="1">
-              <h1>Visa holder enquiry</h1>
-              <div className="wc-content">
-                <div id="_2a0a2a0a" className="wc-panel">
-                  <div className="wc-content">
-                    <div id="_2a0a2a0a1" className="wc-panel">
-                      <div className="wc-flowlayout wc-align-vertical">
-                        <div className="wc-cell">Please complete the following details to view your visa entitlements.</div>
-                        <div className="wc-cell">Fields marked <span style={{ color: '#e00' }}>*</span> must be completed.</div>
-                        <div className="wc-cell">&nbsp;</div>
-                      </div>
-                    </div>
+          <div
+            style={{
+              backgroundColor: "#fff",
+              border: "1px solid #999",
+              margin: "0 auto",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "#012543",
+                color: "#fff",
+                padding: "6px 10px",
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              Visa holder enquiry
+            </div>
 
-                    <div id="_2a0a2a0a2" className="wc-panel">
-                      <div className="wc-flowlayout wc-align-vertical">
+            <div style={{ padding: "15px" }}>
+              <p style={{ margin: "0 0 5px 0", fontSize: "13px" }}>
+                Please complete the following details to view your visa
+                entitlements.
+              </p>
+              <p style={{ margin: "0 0 20px 0", fontSize: "13px" }}>
+                Fields marked <span style={{ color: "#d00" }}>*</span> must be
+                completed.
+              </p>
 
+              {error && (
+                <div
+                  style={{
+                    color: "#d00",
+                    fontWeight: "bold",
+                    marginBottom: "15px",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
 
-                        <div className="wc-cell">
-                          <div id="_2a0a2a0a2c" className="wc-panel">
-                            <div className="wc-content">
-                              <div id="_2a0a2a0a2c1" className="wc-panel">
-                                <div className="wc-flowlayout wc-vgap-sm wc-align-vertical">
-                                  <div className="wc-cell">
-                                    <div role="presentation" id="_2a0a2a0a2c1a" className="wc-fieldlayout wc_fld_lblwth_35 wc-layout-flat">
-                                      <div id="_2a0a2a0a2c1a0" className="wc-field">
-                                        <label htmlFor="_2a0a2a0a2c1a0b_input" id="_2a0a2a0a2c1a0a" className="wc-label wc_req">Reference type*</label>
-                                        <div className="wc-input">
-                                          <span id="_2a0a2a0a2c1a0b" className="wc-dropdown wc-input-wrapper">
-                                            <select id="_2a0a2a0a2c1a0b_input" name="_2a0a2a0a2c1a0b" required value={referenceType} onChange={(e) => setReferenceType(e.target.value)}>
-                                              <option className="wc-option" value="visaGrantNumber">Visa Grant Number</option>
-                                              <option className="wc-option" value="passport">Passport Number</option>
-                                            </select>
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div className="wc-cell">
-                                    <div role="presentation" id="_2a0a2a0a2c1b" className="wc-fieldlayout wc_fld_lblwth_35 wc-layout-flat">
-                                      <div id="_2a0a2a0a2c1b1" className="wc-field">
-                                        <label htmlFor="_2a0a2a0a2c1b1b0_input" id="_2a0a2a0a2c1b1a" className="wc-label wc_req">
-                                          {referenceType === 'passport' ? 'Passport Number*' : 'Visa Grant Number*'}
-                                        </label>
-                                        <div className="wc-input">
-                                          <div id="_2a0a2a0a2c1b1b" className="wc-panel">
-                                            <div className="wc-flowlayout wc-hgap-med wc-align-left">
-                                              <div className="wc-cell">
-                                                <span id="_2a0a2a0a2c1b1b0" className="wc-textfield wc-input-wrapper">
-                                                  <input id="_2a0a2a0a2c1b1b0_input" type="text" name="_2a0a2a0a2c1b1b0" required size="50" maxLength="14" minLength="13" />
-                                                </span>
-                                              </div>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="wc-cell">&nbsp;</div>
-
-                        <div className="wc-cell">
-                          <div id="_2a0a2a0a2e" className="wc-panel">
-                            <div className="wc-content">
-                              <div role="presentation" id="_2a0a2a0a2e0" className="wc-fieldlayout wc_fld_lblwth_35 wc-layout-flat">
-                                <div id="_2a0a2a0a2e0a" className="wc-field">
-                                  <label htmlFor="_2a0a2a0a2e0a1a_input" id="_2a0a2a0a2e0a0" className="wc-label wc_req">Date of birth*</label>
-                                  <div className="wc-input">
-                                    <div id="_2a0a2a0a2e0a1" className="wc-panel">
-                                      <div className="wc-flowlayout wc-hgap-med wc-align-left">
-                                        <div className="wc-cell">
-                                            <div id="_2a0a2a0a2e0a1a" className="wc-datefield wc-input-wrapper wc_datefield_partial" role="combobox">
-                                              <input id="_2a0a2a0a2e0a1a_input" type="date" name="_2a0a2a0a2e0a1a" required autoComplete="off" />
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="wc-cell">
-                          <div id="_2a0a2a0a2f" className="wc-panel wc-margin-all-z">
-                            <div className="wc-content">
-                              &nbsp;
-                              <div role="presentation" id="_2a0a2a0a2f1" className="wc-fieldlayout wc_fld_lblwth_35 wc-layout-flat">
-                                <div id="_2a0a2a0a2f1a" className="wc-field">
-                                  <span className="wc_fld_pl">&nbsp;</span>
-                                  <div className="wc-input">
-                                    <div id="_2a0a2a0a2f1a0" className="wc-panel">
-                                      <div className="wc-content">
-                                        <a id="_2a0a2a0a2f1a0b" className="wc-link" href="#" target="_blank" rel="noopener noreferrer">View Terms and Conditions</a>
-                                        <br/>
-                                        <label htmlFor="_2a0a2a0a2f1b0_input" id="_2a0a2a0a2f1a0c" className="wc-label wc_req"> I have read and agree to the terms and conditions*</label>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div id="_2a0a2a0a2f1b" className="wc-field">
-                                  <span className="wc_fld_pl">&nbsp;</span>
-                                  <div className="wc-input">
-                                    <span id="_2a0a2a0a2f1b0" className="wc-checkbox wc-input-wrapper">
-                                      <input id="_2a0a2a0a2f1b0_input" type="checkbox" name="_2a0a2a0a2f1b0" required value="true" />
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div id="_2a0a2a0a3" className="wc-panel wc-panel-type-feature wc-margin-n-lg wc-margin-s-sm">
-                      <div className="wc-borderlayout" style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 0' }}>
-                        <div className="wc-west wc_bl_mid50">
-                          <button id="_2a0a2a0a3a0a" name="_2a0a2a0a3a0a" value="x" type="button" className="wc-button wc_btn_cancel">Clear</button>
-                        </div>
-                        <div className="wc-east wc_bl_mid50">
-                          <button id="_2a0a2a0a3b0a" name="_2a0a2a0a3b0a" value="x" type="submit" className="wc-button" disabled={loading}>
-                            {loading ? (
-                              <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                <span className="spinner" style={{ width: '12px', height: '12px', border: '2px solid #fff', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></span>
-                                Submitting...
-                              </span>
-                            ) : (
-                              'Submit'
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+              <form onSubmit={handleSubmit}>
+                {/* Document Type (Always visible) */}
+                <div style={rowStyle}>
+                  <div style={labelStyle}>Document type</div>
+                  <div style={inputContainerStyle}>
+                    {requiredAsterisk}
+                    <select
+                      value={documentType}
+                      onChange={(e) => setDocumentType(e.target.value)}
+                      style={inputStyle}
+                    >
+                      <option value="">Please choose a document type</option>
+                      <option value="DFTTA">DFTTA</option>
+                      <option value="ImmiCard">ImmiCard</option>
+                      <option value="Passport">Passport</option>
+                      <option value="PLO56 (M56)">PLO56 (M56)</option>
+                      <option value="Titre de Voyage">Titre de Voyage</option>
+                    </select>
+                    <HelpCircle size={14} style={iconStyle} />
                   </div>
                 </div>
-              </div>
-            </section>
+
+                {/* Conditional Fields based on Document Type selection */}
+                {documentType && (
+                  <>
+                    <div style={rowStyle}>
+                      <div style={labelStyle}>Reference type</div>
+                      <div style={inputContainerStyle}>
+                        {requiredAsterisk}
+                        <select
+                          value={referenceType}
+                          onChange={(e) => setReferenceType(e.target.value)}
+                          style={inputStyle}
+                        >
+                          <option value="">
+                            Please choose a reference type
+                          </option>
+                          <option value="trn">
+                            Transaction Reference Number (TRN)
+                          </option>
+                          <option value="visaGrantNumber">
+                            Visa Grant Number
+                          </option>
+                          <option value="passport">Passport Number</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style={rowStyle}>
+                      <div style={labelStyle}>Date of birth</div>
+                      <div style={inputContainerStyle}>
+                        {requiredAsterisk}
+                        <div style={{ position: 'relative', display: "flex", alignItems: "center", width: "300px" }}>
+                          <input
+                            type="text"
+                            value={dob}
+                            onChange={handleDobChange}
+                            onFocus={() => { if(dobSuggestions.length > 0) setShowDobSuggestions(true); }}
+                            onBlur={() => setTimeout(() => setShowDobSuggestions(false), 200)}
+                            style={{ ...inputStyle, width: "100%" }}
+                          />
+                          {showDobSuggestions && dobSuggestions.length > 0 && (
+                            <div style={{
+                              position: 'absolute',
+                              top: '100%',
+                              left: 0,
+                              right: 0,
+                              backgroundColor: '#fff',
+                              border: '1px solid #ccc',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                              zIndex: 10
+                            }}>
+                              {dobSuggestions.map((sug, idx) => (
+                                <div
+                                  key={idx}
+                                  onClick={() => selectDobSuggestion(sug)}
+                                  style={{
+                                    padding: '4px 8px',
+                                    cursor: 'pointer',
+                                    fontSize: '13px',
+                                    color: '#000'
+                                  }}
+                                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6f7ff'}
+                                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+                                >
+                                  {sug}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div style={{ position: 'relative' }}>
+                          <div 
+                            onClick={() => setShowCalendarPopup(!showCalendarPopup)} 
+                            style={{ border: '1px solid #999', backgroundColor: '#f5f5f5', padding: '3px', marginLeft: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                          >
+                            <Calendar size={16} color="#012543" />
+                          </div>
+                          
+                          {showCalendarPopup && (
+                            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px', backgroundColor: '#fff', border: '1px solid #999', boxShadow: '0 2px 5px rgba(0,0,0,0.2)', width: '300px', zIndex: 100 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px', backgroundColor: '#f2f2f2', borderBottom: '1px solid #ccc' }}>
+                                <div style={{ display: 'flex', gap: '4px' }}>
+                                  <select 
+                                    value={calendarDate.getMonth()} 
+                                    onChange={e => setCalendarDate(new Date(calendarDate.getFullYear(), parseInt(e.target.value), 1))}
+                                    style={{ padding: '2px', border: '1px solid #999', borderRadius: '3px' }}
+                                  >
+                                    {FULL_MONTHS.map((m, i) => <option key={i} value={i}>{m}</option>)}
+                                  </select>
+                                  <input 
+                                    type="text" 
+                                    value={calendarDate.getFullYear()} 
+                                    onChange={e => {
+                                      const y = parseInt(e.target.value);
+                                      if(!isNaN(y)) setCalendarDate(new Date(y, calendarDate.getMonth(), 1));
+                                    }}
+                                    style={{ width: '50px', padding: '2px', border: '1px solid #999', borderRadius: '3px' }}
+                                  />
+                                </div>
+                                <div style={{ display: 'flex', gap: '2px' }}>
+                                  <button type="button" onClick={() => changeMonth(-1)} style={{ padding: '2px', backgroundColor: '#fff', border: '1px solid #999', cursor: 'pointer' }}><ChevronLeft size={14} /></button>
+                                  <button type="button" onClick={() => setCalendarDate(new Date())} style={{ padding: '2px', backgroundColor: '#fff', border: '1px solid #999', cursor: 'pointer' }}><Calendar size={14} /></button>
+                                  <button type="button" onClick={() => changeMonth(1)} style={{ padding: '2px', backgroundColor: '#fff', border: '1px solid #999', cursor: 'pointer' }}><ChevronRight size={14} /></button>
+                                  <button type="button" onClick={() => setShowCalendarPopup(false)} style={{ padding: '2px', backgroundColor: '#fff', border: '1px solid #999', cursor: 'pointer' }}><X size={14} /></button>
+                                </div>
+                              </div>
+                              <table style={{ width: '100%', textAlign: 'center', borderCollapse: 'collapse', fontSize: '13px' }}>
+                                <thead>
+                                  <tr>
+                                    {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => (
+                                      <th key={i} style={{ padding: '4px', fontWeight: 'bold', borderBottom: '1px dotted #000' }}>{d}</th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {generateCalendarGrid().map((row, i) => (
+                                    <tr key={i}>
+                                      {row.map((cell, j) => (
+                                        <td 
+                                          key={j} 
+                                          onClick={() => handleCalendarSelect(cell)}
+                                          style={{ 
+                                            padding: '4px', 
+                                            cursor: 'pointer',
+                                            color: cell.type === 'current' ? '#000' : '#4986e7',
+                                            border: cell.day === new Date().getDate() && cell.type === 'current' && calendarDate.getMonth() === new Date().getMonth() && calendarDate.getFullYear() === new Date().getFullYear() ? '1px solid #d00' : '1px solid transparent'
+                                          }}
+                                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6f7ff'}
+                                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                        >
+                                          {cell.day}
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
+                        </div>
+                        <HelpCircle size={14} style={iconStyle} />
+                      </div>
+                    </div>
+
+                    <div style={rowStyle}>
+                      <div style={labelStyle}>Document number</div>
+                      <div style={inputContainerStyle}>
+                        {requiredAsterisk}
+                        <input
+                          type="text"
+                          value={documentNumber}
+                          onChange={(e) => setDocumentNumber(e.target.value)}
+                          style={inputStyle}
+                        />
+                        <HelpCircle size={14} style={iconStyle} />
+                      </div>
+                    </div>
+
+                    <div style={rowStyle}>
+                      <div style={labelStyle}>Country of document</div>
+                      <div style={inputContainerStyle}>
+                        {requiredAsterisk}
+                        <select
+                          value={country}
+                          onChange={(e) => setCountry(e.target.value)}
+                          style={inputStyle}
+                        >
+                          <option value="">Country</option>
+                          {COUNTRIES.map((c) => (
+                            <option key={c} value={c}>
+                              {c}
+                            </option>
+                          ))}
+                        </select>
+                        <HelpCircle size={14} style={iconStyle} />
+                      </div>
+                    </div>
+
+                    <div style={{ ...rowStyle, marginTop: "20px" }}>
+                      <div style={labelStyle}></div>
+                      <div
+                        style={{
+                          ...inputContainerStyle,
+                          flexDirection: "column",
+                          alignItems: "flex-start",
+                        }}
+                      >
+                        <a
+                          href="#"
+                          style={{
+                            fontSize: "13px",
+                            color: "#012543",
+                            textDecoration: "underline",
+                            marginBottom: "5px",
+                          }}
+                        >
+                          View Terms and Conditions
+                        </a>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                          <input
+                            type="checkbox"
+                            checked={termsAccepted}
+                            onChange={(e) => setTermsAccepted(e.target.checked)}
+                            style={{ marginRight: "5px" }}
+                          />
+                          {requiredAsterisk}
+                          <span style={{ fontSize: "13px" }}>
+                            I have read and agree to the terms and conditions
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {/* Form Buttons */}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    border: "1px solid #bebfc7",
+                    backgroundColor: "#f2f2f2",
+                    marginTop: "20px",
+                    padding: "0.5rm",
+                  }}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDocumentType("");
+                      setReferenceType("");
+                      setDob("");
+                      setDocumentNumber("");
+                      setCountry("");
+                      setTermsAccepted(false);
+                      setError("");
+                    }}
+                    style={{
+                      padding: "3px 15px",
+                      backgroundColor: "#eee",
+                      border: "1px solid #999",
+                      cursor: "pointer",
+                      fontSize: "13px",
+                    }}
+                  >
+                    Clear
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      padding: "3px 15px",
+                      backgroundColor: "#eee",
+                      border: "1px solid #999",
+                      cursor: loading ? "not-allowed" : "pointer",
+                      fontSize: "13px",
+                    }}
+                  >
+                    {loading ? "Submitting..." : "Submit"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
         )}
 
-        {error && (
-          <div className="wc-panel wc-margin-all-lg" style={{ color: 'red', fontWeight: 'bold' }}>
-            <div className="wc-content">Error: {error}</div>
-          </div>
-        )}
-
+        {/* RESULTS PANEL */}
         {visaData && (
-          <div id="visa-details-pdf-content" className="wc-panel wc-margin-all-lg" style={{ backgroundColor: '#fff', border: '1px solid #ccc' }}>
-            <div className="wc-content" style={{ padding: '10px' }}>
-              
-              {/* Top buttons bar */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #ccc', paddingBottom: '10px', marginBottom: '20px' }}>
-                <button type="button" className="wc-button" onClick={() => setVisaData(null)} style={{ padding: '4px 10px', backgroundColor: '#f5f5f5', border: '1px solid #999', cursor: 'pointer', color: '#000' }}>New enquiry</button>
+          <div
+            id="visa-details-pdf-content"
+            style={{
+              backgroundColor: "#fff",
+              border: "1px solid #999",
+              maxWidth: "1000px",
+              margin: "0 auto",
+            }}
+          >
+            <div style={{ padding: "20px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  borderBottom: "1px solid #ccc",
+                  paddingBottom: "10px",
+                  marginBottom: "20px",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setVisaData(null)}
+                  style={{
+                    padding: "4px 10px",
+                    backgroundColor: "#f5f5f5",
+                    border: "1px solid #999",
+                    cursor: "pointer",
+                  }}
+                >
+                  New enquiry
+                </button>
                 <div>
-                  <button type="button" className="wc-button" onClick={handleDownloadPdf} style={{ padding: '4px 10px', backgroundColor: '#e2e2e2', border: '1px solid #999', marginRight: '10px', color: '#000' }}>View as PDF</button>
-                  <button type="button" className="wc-button" style={{ padding: '4px 10px', backgroundColor: '#f5f5f5', border: '1px solid #999', color: '#000' }}>Send Email</button>
+                  <button
+                    type="button"
+                    onClick={handleDownloadPdf}
+                    style={{
+                      padding: "4px 10px",
+                      backgroundColor: "#e2e2e2",
+                      border: "1px solid #999",
+                    }}
+                  >
+                    View as PDF
+                  </button>
                 </div>
               </div>
 
-              {/* Data Table */}
-              <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '14px', lineHeight: '1.8' }}>
+              <table
+                style={{
+                  width: "100%",
+                  textAlign: "left",
+                  borderCollapse: "collapse",
+                  fontSize: "14px",
+                }}
+              >
                 <tbody>
                   <tr>
-                    <td style={{ width: '25%', paddingBottom: '15px' }}>Current date and time</td>
-                    <td style={{ width: '75%', paddingBottom: '15px' }}>{new Date().toLocaleString('en-AU', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short', timeZone: 'Australia/Sydney' })} Canberra, Australia</td>
+                    <td style={{ width: "30%", padding: "8px 10px" }}>
+                      Current date and time
+                    </td>
+                    <td style={{ width: "70%", padding: "8px 10px" }}>
+                      {new Date().toLocaleString("en-AU", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        second: "2-digit",
+                        timeZoneName: "short",
+                        timeZone: "Australia/Sydney",
+                      })}{" "}
+                      Canberra, Australia
+                    </td>
                   </tr>
                   <tr>
-                    <td>Family name</td>
-                    <td>{visaData.familyName}</td>
+                    <td style={{ padding: "8px 10px" }}>Family name</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.familyName}</td>
                   </tr>
                   <tr>
-                    <td>Given name(s)</td>
-                    <td>{visaData.givenNames}</td>
+                    <td style={{ padding: "8px 10px" }}>Given name(s)</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.givenNames}</td>
                   </tr>
                   <tr>
-                    <td>Document number</td>
-                    <td>{visaData.documentNumber}</td>
+                    <td style={{ padding: "8px 10px" }}>Date of birth</td>
+                    <td style={{ padding: "8px 10px" }}>{formatDate(visaData.dateOfBirth)}</td>
                   </tr>
                   <tr>
-                    <td>Visa class / subclass</td>
-                    <td>{visaData.visaClassSubclass}</td>
+                    <td style={{ padding: "8px 10px" }}>Document number</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.documentNumber}</td>
                   </tr>
                   <tr>
-                    <td>Visa applicant</td>
-                    <td>{visaData.visaApplicant}</td>
+                    <td style={{ padding: "8px 10px" }}>Nationality</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.nationality}</td>
                   </tr>
                   <tr>
-                    <td>Visa grant date</td>
-                    <td>{formatDate(visaData.visaGrantDate)}</td>
+                    <td style={{ padding: "8px 10px" }}>Visa class / subclass</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.visaClassSubclass}</td>
                   </tr>
                   <tr>
-                    <td>Visa expiry date</td>
-                    <td>{formatDate(visaData.visaExpiryDate)}</td>
-                  </tr>
-                  {/* <tr>
-                    <td>Location</td>
-                    <td>{visaData.location}</td>
-                  </tr> */}
-                  <tr>
-                    <td>Visa status</td>
-                    <td>{visaData.visaStatus}</td>
+                    <td style={{ padding: "8px 10px" }}>Visa applicant</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.visaApplicant}</td>
                   </tr>
                   <tr>
-                    <td>Visa grant number</td>
-                    <td>{visaData.visaGrantNumber}</td>
+                    <td style={{ padding: "8px 10px" }}>Visa grant date</td>
+                    <td style={{ padding: "8px 10px" }}>{formatDate(visaData.visaGrantDate)}</td>
                   </tr>
                   <tr>
-                    <td>Entries allowed</td>
-                    <td>{visaData.entriesAllowed}</td>
+                    <td style={{ padding: "8px 10px" }}>Visa expiry date</td>
+                    <td style={{ padding: "8px 10px" }}>{formatDate(visaData.visaExpiryDate)}</td>
                   </tr>
                   <tr>
-                    <td>Must not arrive after</td>
-                    <td>{formatDate(visaData.mustNotArriveAfter)}</td>
+                    <td style={{ padding: "8px 10px" }}>Visa status</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.visaStatus}</td>
                   </tr>
                   <tr>
-                    <td>Enter before date</td>
-                    <td>{formatDate(visaData.enterBeforeDate)}</td>
+                    <td style={{ padding: "8px 10px" }}>Visa grant number</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.visaGrantNumber}</td>
                   </tr>
                   <tr>
-                    <td>Period of stay</td>
-                    <td>{visaData.periodOfStay}</td>
+                    <td style={{ padding: "8px 10px" }}>Entries allowed</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.entriesAllowed}</td>
                   </tr>
                   <tr>
-                    <td>Visa type</td>
-                    <td>{visaData.visaType}</td>
+                    <td style={{ padding: "8px 10px" }}>Must not arrive after</td>
+                    <td style={{ padding: "8px 10px" }}>{formatDate(visaData.mustNotArriveAfter)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: "8px 10px" }}>Enter before date</td>
+                    <td style={{ padding: "8px 10px" }}>{formatDate(visaData.enterBeforeDate)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: "8px 10px" }}>Period of stay</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.periodOfStay}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: "8px 10px" }}>Visa type</td>
+                    <td style={{ padding: "8px 10px" }}>{visaData.visaType}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </div>
         )}
+      </div>
 
-        <footer id="_3" className="wc-panel wc-panel-type-footer wc-margin-all-lg">
-          <div className="wc-borderlayout">
-            <div className="wc_bl_mid">
-              <div className="wc-west wc_bl_mid50">
-                <div id="_3a" className="wc-panel">
-                  <ul className="wc-listlayout wc-hgap-med wc-align-left wc-listlayout-type-flat wc-listlayout-separator-bar">
-                    <li><a id="_3a0" className="wc-link" href="#">Accessibility</a></li>
-                    <li><a id="_3a1" className="wc-link" href="#">Online Security</a></li>
-                    <li><a id="_3a2" className="wc-link" href="#">Privacy</a></li>
-                    <li><a id="_3a3" className="wc-link" href="#">Copyright &amp; Disclaimer</a></li>
-                    <li><button id="_3a4" type="button" className="wc-button wc-linkbutton wc_btn_cancel">Change Password</button></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </footer>
-      </form>
+      {/* FOOTER */}
+      <footer style={{ margin: "0 10px", padding: "15px" }}>
+        <div style={{ fontSize: "12px" }}>
+          <a href="#" style={{ color: "#012543", textDecoration: "underline" }}>
+            Accessibility
+          </a>{" "}
+          |{" "}
+          <a href="#" style={{ color: "#012543", textDecoration: "underline" }}>
+            Online Security
+          </a>{" "}
+          |{" "}
+          <a href="#" style={{ color: "#012543", textDecoration: "underline" }}>
+            Privacy
+          </a>{" "}
+          |{" "}
+          <a href="#" style={{ color: "#012543", textDecoration: "underline" }}>
+            Copyright &amp; Disclaimer
+          </a>{" "}
+          |{" "}
+          <a href="#" style={{ color: "#012543", textDecoration: "underline" }}>
+            Change Password
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

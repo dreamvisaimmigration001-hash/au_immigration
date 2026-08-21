@@ -21,14 +21,15 @@ function ImmiAccountLogin() {
       });
       if (response.ok) {
         const data = await response.json();
+        if (data.user.role === 'user') {
+          alert('Access denied: Standard users cannot log into this portal.');
+          return;
+        }
+
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.user.role);
         alert('Login successful!');
-        if (data.user.role === 'admin' || data.user.role === 'employe') {
-          navigate('/dashboard');
-        } else {
-          navigate('/user-portal');
-        }
+        navigate('/dashboard');
       } else {
         const errorData = await response.json();
         alert(`Login failed: ${errorData.message}`);
