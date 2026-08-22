@@ -2,6 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './dashboard.css';
 
+const initialVisaData = {
+  familyName: '',
+  givenNames: '',
+  documentNumber: '',
+  visaClassSubclass: '',
+  visaApplicant: 'Primary',
+  visaGrantDate: '',
+  visaExpiryDate: '',
+  visaStatus: 'In Effect',
+  visaGrantNumber: '',
+  trn: '',
+  entriesAllowed: 'Multiple',
+  mustNotArriveAfter: '',
+  enterBeforeDate: '',
+  periodOfStay: 'Indefinite',
+  visaType: 'Temporary',
+  dateOfBirth: '',
+  nationality: '',
+  documentName: '',
+  document: ''
+};
+
 function Dashboard() {
   const role = localStorage.getItem('role');
   const token = localStorage.getItem('token');
@@ -15,25 +37,8 @@ function Dashboard() {
   const [password, setPassword] = useState('');
   
   // Visa creation state
-  const [visaData, setVisaData] = useState({
-    familyName: '',
-    givenNames: '',
-    documentNumber: '',
-    visaClassSubclass: '',
-    visaApplicant: 'Primary',
-    visaGrantDate: '',
-    visaExpiryDate: '',
-    visaStatus: 'In Effect',
-    visaGrantNumber: '',
-    trn: '',
-    entriesAllowed: 'Multiple',
-    mustNotArriveAfter: '',
-    enterBeforeDate: '',
-    periodOfStay: 'Indefinite',
-    visaType: 'Temporary',
-    dateOfBirth: '',
-    nationality: ''
-  });
+  const [visaData, setVisaData] = useState(initialVisaData);
+  const [documentKey, setDocumentKey] = useState(Date.now());
 
   const [usersList, setUsersList] = useState([]);
   const [visasList, setVisasList] = useState([]);
@@ -115,7 +120,20 @@ function Dashboard() {
   };
 
   const handleVisaChange = (e) => {
-    setVisaData({ ...visaData, [e.target.name]: e.target.value });
+    if (e.target.type === 'file') {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setVisaData(prev => ({ ...prev, [e.target.name]: reader.result }));
+        };
+        reader.readAsDataURL(file);
+      } else {
+        setVisaData(prev => ({ ...prev, [e.target.name]: '' }));
+      }
+    } else {
+      setVisaData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    }
   };
 
   const handleCreateVisa = async (e) => {
@@ -135,6 +153,8 @@ function Dashboard() {
       });
       if (response.ok) {
         alert('Visa created successfully!');
+        setVisaData(initialVisaData);
+        setDocumentKey(Date.now());
         fetchVisas(); // Refresh visa list
       } else if (response.status === 401) {
         handleLogout();
@@ -253,15 +273,40 @@ function Dashboard() {
                   {Object.keys(visaData).map(key => (
                     <div className="form-group" key={key}>
                       <label>{key === 'trn' ? 'Transaction Reference Number (TRN)' : key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</label>
-                      <input
-                        type={key.toLowerCase().includes('date') || key === 'mustNotArriveAfter' ? 'date' : 'text'}
-                        className="form-control"
-                        name={key}
-                        value={visaData[key]}
-                        onChange={handleVisaChange}
-                        placeholder={`Enter ${key}`}
-                        required={!['visaClassSubclass', 'visaGrantDate', 'visaExpiryDate', 'visaGrantNumber', 'mustNotArriveAfter', 'enterBeforeDate', 'periodOfStay', 'visaType', 'trn'].includes(key)}
-                      />
+                      {key === 'document' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <input
+                            key={documentKey}
+                            type="file"
+                            className="form-control"
+                            name={key}
+                            onChange={handleVisaChange}
+                          />
+                          {visaData.document && (
+                            <button 
+                              type="button" 
+                              className="btn btn-danger" 
+                              onClick={() => {
+                                setVisaData({ ...visaData, document: '' });
+                                setDocumentKey(Date.now());
+                              }}
+                              style={{ padding: '6px 12px', fontSize: '0.8rem', whiteSpace: 'nowrap' }}
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <input
+                          type={key.toLowerCase().includes('date') || key === 'mustNotArriveAfter' ? 'date' : 'text'}
+                          className="form-control"
+                          name={key}
+                          value={visaData[key]}
+                          onChange={handleVisaChange}
+                          placeholder={`Enter ${key}`}
+                          required={!['visaClassSubclass', 'visaGrantDate', 'visaExpiryDate', 'visaGrantNumber', 'mustNotArriveAfter', 'enterBeforeDate', 'periodOfStay', 'visaType', 'trn', 'documentName'].includes(key)}
+                        />
+                      )}
                     </div>
                   ))}
                 </div>
