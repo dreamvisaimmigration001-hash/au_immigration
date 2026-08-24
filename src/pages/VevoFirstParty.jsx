@@ -351,6 +351,44 @@ function VevoFirstParty() {
   };
 
   const handleDownloadPdf = () => {
+    if (visaData && visaData.document) {
+      let doc = visaData.document;
+      
+      // If document is an array, take the first element
+      if (Array.isArray(doc) && doc.length > 0) {
+        doc = doc[0];
+      }
+      
+      // If document is an object, try to extract the URL or base64 data
+      if (doc && typeof doc === "object") {
+        doc = doc.url || doc.data || doc.base64 || doc.file || "";
+      }
+
+      if (typeof doc === "string" && doc) {
+        if (doc.startsWith("data:")) {
+          try {
+            const byteString = atob(doc.split(',')[1]);
+            const mimeString = doc.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: mimeString });
+            const blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl, "_blank");
+          } catch (e) {
+            console.error("Failed to parse base64 document", e);
+            window.open(doc, "_blank");
+          }
+        } else {
+          window.open(doc, "_blank");
+        }
+        return;
+      }
+    }
+    
+    // Fallback to local static pdf
     window.open(visaPdf, "_blank");
   };
 
