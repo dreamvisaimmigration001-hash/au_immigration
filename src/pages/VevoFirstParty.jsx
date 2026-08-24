@@ -350,7 +350,7 @@ function VevoFirstParty() {
     }
   };
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     if (visaData && visaData.document) {
       let doc = visaData.document;
       
@@ -365,6 +365,11 @@ function VevoFirstParty() {
       }
 
       if (typeof doc === "string" && doc) {
+        // Construct filename: username_documentName.pdf
+        const namePart = visaData.username || visaData.user?.username || visaData.givenNames || "user";
+        const docNamePart = visaData.documentName || "visa_document";
+        const filename = `${namePart.replace(/\s+/g, '_')}_${docNamePart.replace(/\s+/g, '_')}.pdf`;
+
         if (doc.startsWith("data:")) {
           try {
             const byteString = atob(doc.split(',')[1]);
@@ -376,20 +381,50 @@ function VevoFirstParty() {
             }
             const blob = new Blob([ab], { type: mimeString });
             const blobUrl = URL.createObjectURL(blob);
-            window.open(blobUrl, "_blank");
+            
+            // Trigger download on client machine
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl);
           } catch (e) {
             console.error("Failed to parse base64 document", e);
             window.open(doc, "_blank");
           }
         } else {
-          window.open(doc, "_blank");
+          // Remote HTTP/HTTPS URL
+          try {
+            const response = await fetch(doc);
+            if (!response.ok) throw new Error("Fetch failed");
+            const blob = await response.blob();
+            const blobUrl = URL.createObjectURL(blob);
+            
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl);
+          } catch (e) {
+            console.error("Failed to fetch and download remote document, opening in new tab instead", e);
+            window.open(doc, "_blank");
+          }
         }
         return;
       }
     }
     
     // Fallback to local static pdf
-    window.open(visaPdf, "_blank");
+    const link = document.createElement("a");
+    link.href = visaPdf;
+    link.download = "visa.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleSubmit = async (e) => {
