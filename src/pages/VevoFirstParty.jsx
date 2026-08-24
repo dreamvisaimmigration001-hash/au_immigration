@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import { HelpCircle, Calendar, Home, ChevronLeft, ChevronRight, X } from "lucide-react";
 import html2pdf from "html2pdf.js";
 import "./vevo.css";
@@ -210,20 +210,6 @@ function VevoFirstParty() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [pdfUrl, setPdfUrl] = useState(null);
-  const [pdfFilename, setPdfFilename] = useState("");
-  const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [previewLoading, setPreviewLoading] = useState(false);
-  const blobUrlRef = useRef(null);
-
-  useEffect(() => {
-    return () => {
-      if (blobUrlRef.current) {
-        URL.revokeObjectURL(blobUrlRef.current);
-      }
-    };
-  }, []);
-
   // Form state
   const [documentType, setDocumentType] = useState("");
   const [referenceType, setReferenceType] = useState("");
@@ -364,95 +350,47 @@ function VevoFirstParty() {
     }
   };
 
-  const downloadPdfFromUrl = (url, filename) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleViewPdf = async () => {
-    setPreviewLoading(true);
-    try {
-      let resolvedUrl = "";
-      let filename = "visa.pdf";
-
-      if (visaData && visaData.document) {
-        let doc = visaData.document;
-        
-        // If document is an array, take the first element
-        if (Array.isArray(doc) && doc.length > 0) {
-          doc = doc[0];
-        }
-        
-        // If document is an object, try to extract the URL or base64 data
-        if (doc && typeof doc === "object") {
-          doc = doc.url || doc.data || doc.base64 || doc.file || "";
-        }
-
-        if (typeof doc === "string" && doc) {
-          // Construct filename: username_documentName.pdf
-          const namePart = visaData.username || visaData.user?.username || visaData.givenNames || "user";
-          const docNamePart = visaData.documentName || "visa_document";
-          filename = `${namePart.replace(/\s+/g, '_')}_${docNamePart.replace(/\s+/g, '_')}.pdf`;
-
-          if (doc.startsWith("data:")) {
-            try {
-              const byteString = atob(doc.split(',')[1]);
-              const mimeString = doc.split(',')[0].split(':')[1].split(';')[0];
-              const ab = new ArrayBuffer(byteString.length);
-              const ia = new Uint8Array(ab);
-              for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
-              }
-              const blob = new Blob([ab], { type: mimeString });
-              
-              if (blobUrlRef.current) {
-                URL.revokeObjectURL(blobUrlRef.current);
-              }
-              const blobUrl = URL.createObjectURL(blob);
-              blobUrlRef.current = blobUrl;
-              resolvedUrl = blobUrl;
-            } catch (e) {
-              console.error("Failed to parse base64 document", e);
-              resolvedUrl = doc; // fallback to raw data URL
-            }
-          } else {
-            // Remote HTTP/HTTPS URL
-            try {
-              const response = await fetch(doc);
-              if (!response.ok) throw new Error("Fetch failed");
-              const blob = await response.blob();
-              
-              if (blobUrlRef.current) {
-                URL.revokeObjectURL(blobUrlRef.current);
-              }
-              const blobUrl = URL.createObjectURL(blob);
-              blobUrlRef.current = blobUrl;
-              resolvedUrl = blobUrl;
-            } catch (e) {
-              console.error("Failed to fetch remote document, using direct URL", e);
-              resolvedUrl = doc;
-            }
-          }
-        }
-      } else {
-        // Fallback to local static pdf
-        resolvedUrl = visaPdf;
-        filename = "visa.pdf";
+    if (visaData && visaData.document) {
+      let doc = visaData.document;
+      
+      // If document is an array, take the first element
+      if (Array.isArray(doc) && doc.length > 0) {
+        doc = doc[0];
+      }
+      
+      // If document is an object, try to extract the URL or base64 data
+      if (doc && typeof doc === "object") {
+        doc = doc.url || doc.data || doc.base64 || doc.file || "";
       }
 
-      setPdfUrl(resolvedUrl);
-      setPdfFilename(filename);
-      setShowPreviewModal(true);
-    } catch (err) {
-      console.error("Error preparing PDF preview:", err);
-      setError("Failed to open PDF preview.");
-    } finally {
-      setPreviewLoading(false);
+      if (typeof doc === "string" && doc) {
+        if (doc.startsWith("data:")) {
+          try {
+            const byteString = atob(doc.split(',')[1]);
+            const mimeString = doc.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+              ia[i] = byteString.charCodeAt(i);
+            }
+            const blob = new Blob([ab], { type: mimeString });
+            const blobUrl = URL.createObjectURL(blob);
+            window.open(blobUrl, "_blank");
+          } catch (e) {
+            console.error("Failed to parse base64 document", e);
+            window.open(doc, "_blank");
+          }
+        } else {
+          // Remote HTTP/HTTPS URL
+          window.open(doc, "_blank");
+        }
+        return;
+      }
     }
+    
+    // Fallback to local static pdf
+    window.open(visaPdf, "_blank");
   };
 
   const handleSubmit = async (e) => {
@@ -956,15 +894,14 @@ function VevoFirstParty() {
                   <button
                     type="button"
                     onClick={handleViewPdf}
-                    disabled={previewLoading}
                     style={{
                       padding: "4px 10px",
                       backgroundColor: "#e2e2e2",
                       border: "1px solid #999",
-                      cursor: previewLoading ? "wait" : "pointer",
+                      cursor: "pointer",
                     }}
                   >
-                    {previewLoading ? "Loading Preview..." : "View as PDF"}
+                    View as PDF
                   </button>
                 </div>
               </div>
@@ -1092,122 +1029,6 @@ function VevoFirstParty() {
           </a>
         </div>
       </footer>
-
-      {/* PDF PREVIEW MODAL */}
-      {showPreviewModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.6)",
-            backdropFilter: "blur(4px)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 9999,
-            padding: "20px",
-          }}
-          onClick={() => setShowPreviewModal(false)}
-        >
-          <div
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: "8px",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.3)",
-              width: "90%",
-              maxWidth: "1000px",
-              height: "85vh",
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div
-              style={{
-                backgroundColor: "#012543",
-                color: "#fff",
-                padding: "15px 20px",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                borderBottom: "1px solid #ccc",
-              }}
-            >
-              <span style={{ fontSize: "16px", fontWeight: "bold" }}>
-                Document Preview: {pdfFilename}
-              </span>
-              <div style={{ display: "flex", gap: "10px" }}>
-                <button
-                  type="button"
-                  onClick={() => downloadPdfFromUrl(pdfUrl, pdfFilename)}
-                  style={{
-                    padding: "6px 14px",
-                    backgroundColor: "#fff",
-                    color: "#012543",
-                    border: "1px solid #999",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    fontSize: "13px",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    transition: "background-color 0.2s",
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#e2e2e2"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#fff"}
-                >
-                  Download PDF
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowPreviewModal(false)}
-                  style={{
-                    padding: "6px 14px",
-                    backgroundColor: "#d00",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    fontSize: "13px",
-                    transition: "background-color 0.2s",
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#b00"}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#d00"}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div style={{ flex: 1, backgroundColor: "#f5f5f5", position: "relative" }}>
-              {pdfUrl ? (
-                <iframe
-                  src={pdfUrl}
-                  title="PDF Preview"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    border: "none",
-                  }}
-                />
-              ) : (
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100%", color: "#666" }}>
-                  Loading PDF preview...
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
